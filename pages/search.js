@@ -4,7 +4,7 @@ import { Tabs, Tab } from "@mui/material";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
-import JournalEntryCard from "./journalEntryCard"; // Component for rendering each entry
+import JournalEntryCard from "./JournalEntryCard"; // Component for rendering each entry
 
 const BACKEND_URL = "http://127.0.0.1:5000";
 
