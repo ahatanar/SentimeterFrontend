@@ -8,7 +8,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import JournalEntryCard from "./JournalEntryCard"; // Import your custom JournalEntryCard component
 
-const BACKEND_URL = "http://127.0.0.1:5000";
+const BACKEND_URL = process.env.BACKEND_URL;
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

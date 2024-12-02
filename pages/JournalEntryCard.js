@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import moment from "moment";
 
-const BACKEND_URL = "http://127.0.0.1:5000";
+const BACKEND_URL = process.env.BACKEND_URL;
 
 const JournalEntryCard = ({ entry, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
