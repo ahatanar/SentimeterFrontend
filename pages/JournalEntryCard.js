@@ -8,12 +8,18 @@ const JournalEntryCard = ({ entry, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const formatDate = (dateString) => moment(dateString).format("MMMM Do, YYYY");
+  const formatDate = (dateString) => {
+    if (!dateString) return "Unknown Date";
+    return moment(dateString).format("MMMM Do, YYYY");
+  };
 
-  const truncateContent = (content, length) =>
-    content.length > length ? `${content.substring(0, length)}...` : content;
+  const truncateContent = (content, length) => {
+    if (!content) return "No content available.";
+    return content.length > length ? `${content.substring(0, length)}...` : content;
+  };
 
   const getSentimentColor = (sentimentScore) => {
+    if (!sentimentScore) return "bg-gray-100 border-gray-300"; // Default color for undefined scores
     const score = parseFloat(sentimentScore);
     if (score < -0.5) return "bg-red-100 border-red-300";
     if (score >= -0.5 && score <= 0.5) return "bg-yellow-100 border-yellow-300";
@@ -23,16 +29,24 @@ const JournalEntryCard = ({ entry, onDelete }) => {
   const handleDelete = async () => {
     setLoading(true);
     try {
-      await axios.delete(`${BACKEND_URL}/api/journals/${entry.entry_id}`, {
+      await axios.delete(`${BACKEND_URL}/api/journals/${entry?.entry_id}`, {
         withCredentials: true,
       });
-      onDelete(entry.entry_id);
+      if (onDelete) onDelete(entry?.entry_id);
     } catch (error) {
       console.error("Error deleting entry:", error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
   };
+
+  if (!entry) {
+    return (
+      <div className="p-4 border rounded shadow-sm bg-gray-100">
+        <p className="text-gray-600">Invalid journal entry.</p>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -45,14 +59,13 @@ const JournalEntryCard = ({ entry, onDelete }) => {
         <div>
           <p className="text-gray-800 font-semibold">{formatDate(entry.timestamp)}</p>
           <p className="text-sm text-gray-500">
-            Sentiment: {entry.sentiment} ({parseFloat(entry.sentiment_score).toFixed(2)})
+            Sentiment: {entry.sentiment || "Unknown"} (
+            {entry.sentiment_score ? parseFloat(entry.sentiment_score).toFixed(2) : "N/A"})
           </p>
           <p className="mt-2 text-gray-700">
-            {expanded
-              ? entry.entry
-              : truncateContent(entry.entry, 50)}
+            {expanded ? entry.entry : truncateContent(entry.entry, 50)}
           </p>
-          {!expanded && entry.keywords.length > 0 && (
+          {!expanded && entry.keywords && entry.keywords.length > 0 && (
             <p className="text-sm text-gray-500 mt-1">
               <strong>Top Keyword:</strong> {entry.keywords[0]}
             </p>
@@ -86,12 +99,15 @@ const JournalEntryCard = ({ entry, onDelete }) => {
           </p>
           <p className="text-sm text-gray-500">
             <strong>Keywords:</strong>{" "}
-            {entry.keywords.length > 0
+            {entry.keywords && entry.keywords.length > 0
               ? entry.keywords.slice(0, 3).join(", ")
               : "No keywords available"}
           </p>
           <p className="text-sm text-gray-500">
-            <strong>Location:</strong> {entry.location.city}, {entry.location.country}
+            <strong>Location:</strong>{" "}
+            {entry.location
+              ? `${entry.location.city || "Unknown"}, ${entry.location.country || "Unknown"}`
+              : "No location data available"}
           </p>
         </div>
       )}
