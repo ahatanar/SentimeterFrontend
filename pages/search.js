@@ -6,7 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
 import JournalEntryCard from "./JournalEntryCard"; // Component for rendering each entry
 
-const BACKEND_URL = process.env.BACKEND_URL;
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function SearchPage() {
   const [activeTab, setActiveTab] = useState(0);

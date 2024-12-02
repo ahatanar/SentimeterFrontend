@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import moment from "moment";
 
-const BACKEND_URL = process.env.BACKEND_URL;
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const JournalEntryCard = ({ entry, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
