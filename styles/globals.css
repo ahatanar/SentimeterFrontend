@@ -1,0 +1,56 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-100;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+.bg-light-pattern {
+  background-image: url('/background.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.color-empty {
+  fill: #ebedf0;
+}
+.color-scale-1 {
+  fill: #9be9a8;
+}
+.color-scale-2 {
+  fill: #40c463;
+}
+.color-scale-3 {
+  fill: #30a14e;
+}
+
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  list-style-type: none;
+  padding: 0;
+}
+
+.pagination li {
+  margin: 0 5px;
+}
+
+.pagination li a {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.pagination li.active a {
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+}
