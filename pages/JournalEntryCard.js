@@ -19,7 +19,7 @@ const JournalEntryCard = ({ entry, onDelete }) => {
   };
 
   const getSentimentColor = (sentimentScore) => {
-    if (!sentimentScore) return "bg-gray-100 border-gray-300"; // Default color for undefined scores
+    if (!sentimentScore) return "bg-gray-100 border-gray-300"; 
     const score = parseFloat(sentimentScore);
     if (score < -0.5) return "bg-red-100 border-red-300";
     if (score >= -0.5 && score <= 0.5) return "bg-yellow-100 border-yellow-300";
