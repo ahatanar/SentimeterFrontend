@@ -42,9 +42,13 @@ const NavBar = ({ isAuthenticated, user, onLogout }) => {
             </Button>
           </>
         ) : (
-          <Button onClick={() => (window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/login`)} variant="contained" color="primary">
-            Sign in with Google
-          </Button>
+          <Button
+          onClick={() => (window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/login`)}
+          variant="contained"
+          color="primary"
+        >
+          Sign in with Google
+        </Button>
         )}
       </div>
     </nav>

@@ -171,7 +171,7 @@ export default function Insights() {
         )}
       </div>
       <footer className="bg-gray-800 text-white text-center py-4">
-        <p>&copy; Sentimerer. All rights reserved.</p>
+        <p>&copy; Sentimeter. All rights reserved.</p>
       </footer>
     </div>
   );
