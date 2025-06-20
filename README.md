@@ -1,6 +1,6 @@
 ### Frontend
 
-1.  Navigate to the frontend directory:
+1.  Make sure your in the the frontend directory:
     ```bash
     cd SentimeterFrontend
     ```
