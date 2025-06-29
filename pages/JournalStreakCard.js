@@ -1,4 +1,5 @@
 import React from 'react';
+import { TrendingUp, Calendar, AlertCircle } from 'lucide-react';
 
 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -13,25 +14,27 @@ function getIntensity(count) {
 const JournalStreakCard = ({ streakData, loading, error }) => {
   if (loading) {
     return (
-      <div className="w-full max-w-3xl mx-auto p-6 bg-white rounded-2xl shadow-md flex flex-col items-center animate-pulse">
-        <div className="h-6 w-1/2 bg-gray-200 rounded mb-4" />
-        <div className="h-4 w-1/3 bg-gray-200 rounded mb-2" />
-        <div className="h-4 w-1/3 bg-gray-200 rounded mb-2" />
-        <div className="h-4 w-1/3 bg-gray-200 rounded mb-2" />
-        <div className="h-20 w-full bg-gray-100 rounded mt-4" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6 animate-pulse">
+            <div className="h-8 bg-gray-700 rounded mb-4 w-2/3" />
+            <div className="h-10 bg-gray-700 rounded mb-2 w-1/3" />
+            <div className="h-4 bg-gray-700 rounded w-1/2" />
+          </div>
+        ))}
       </div>
     );
   }
+
   if (error) {
     return (
-      <div className="w-full max-w-3xl mx-auto p-6 bg-red-100 rounded-2xl shadow-md text-red-700">
-        Error loading streak data: {error}
+      <div className="bg-red-500/10 backdrop-blur-sm rounded-xl border border-red-500/20 p-6 mb-8">
+        <p className="text-red-400">Error loading streak data: {error}</p>
       </div>
     );
   }
-  if (!streakData) {
-    return null;
-  }
+
+  if (!streakData) return null;
 
   const {
     streak,
@@ -64,78 +67,42 @@ const JournalStreakCard = ({ streakData, loading, error }) => {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-6 bg-white rounded-2xl shadow-lg mb-8 flex flex-col md:flex-row gap-8 items-stretch">
-      {/* Left: Streak Stats */}
-      <div className="flex-1 flex flex-col justify-between">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <span role="img" aria-label="fire">🔥</span> Journal Streak
-          </h2>
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${has_written_today ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}> 
-            {has_written_today ? (
-              <>
-                <span role="img" aria-label="check">✅</span> Written Today
-              </>
-            ) : (
-              <>
-                <span role="img" aria-label="cross">❌</span> Not Yet Today
-              </>
-            )}
-          </span>
-        </div>
-        <div className="grid grid-cols-2 gap-6 mb-4">
-          <div className="flex flex-col items-center">
-            <span className="text-4xl font-extrabold text-green-600">{streak}</span>
-            <span className="text-gray-600 text-sm">Current Streak</span>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      {/* Current Streak Card */}
+      <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <TrendingUp className="h-5 w-5 text-green-400" />
+            <h3 className="text-lg font-semibold text-white">Current Streak</h3>
           </div>
-          <div className="flex flex-col items-center">
-            <span className="text-4xl font-extrabold text-blue-600">{longest_streak}</span>
-            <span className="text-gray-600 text-sm">Longest Streak</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-lg font-semibold text-gray-800">{last_entry_date ? new Date(last_entry_date).toLocaleDateString() : '-'}</span>
-            <span className="text-gray-600 text-sm">Last Entry</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-lg font-semibold text-gray-800">{missed_days?.length || 0}</span>
-            <span className="text-gray-600 text-sm">Missed Days</span>
+          <div className={`px-3 py-1 ${has_written_today ? 'bg-green-500/20' : 'bg-purple-500/20'} rounded-full`}>
+            <span className={`text-sm font-medium ${has_written_today ? 'text-green-400' : 'text-purple-300'}`}>
+              {has_written_today ? 'Active' : 'Write Today'}
+            </span>
           </div>
         </div>
-        {missed_days?.length > 0 && (
-          <div className="mt-2 text-xs text-yellow-700 bg-yellow-50 rounded p-2 w-full">
-            <span role="img" aria-label="warning">⚠️</span> Missed days: {missed_days.slice(-5).map(d => new Date(d).toLocaleDateString()).join(', ')}{missed_days.length > 5 ? '...' : ''}
-          </div>
-        )}
+        <div className="text-3xl font-bold text-green-400 mb-2">{streak || 0}</div>
+        <p className="text-gray-400 text-sm">Keep it going!</p>
       </div>
 
-      {/* Divider */}
-      <div className="hidden md:block w-px bg-gray-200 mx-4" />
-
-      {/* Right: Activity Heatmap */}
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <h3 className="text-lg font-semibold mb-2">Activity Heatmap</h3>
-        <div className="flex gap-1">
-          {/* Day labels */}
-          <div className="flex flex-col gap-1 mr-2">
-            {dayNames.map((d) => (
-              <span key={d} className="text-xs text-gray-400 h-5">{d}</span>
-            ))}
-          </div>
-          {/* Heatmap grid */}
-          <div className="flex gap-1">
-            {weeks.map((week, i) => (
-              <div key={i} className="flex flex-col gap-1">
-                {week.map((day, j) => (
-                  <div
-                    key={j}
-                    title={`${day.date}: ${day.count} entries`}
-                    className={`w-5 h-5 rounded ${getIntensity(day.count)} border border-gray-100`}
-                  ></div>
-                ))}
-              </div>
-            ))}
-          </div>
+      {/* Longest Streak Card */}
+      <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+        <div className="flex items-center space-x-2 mb-4">
+          <Calendar className="h-5 w-5 text-blue-400" />
+          <h3 className="text-lg font-semibold text-white">Longest Streak</h3>
         </div>
+        <div className="text-3xl font-bold text-blue-400 mb-2">{longest_streak || 0}</div>
+        <p className="text-gray-400 text-sm">Personal best</p>
+      </div>
+
+      {/* Missed Days Card */}
+      <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+        <div className="flex items-center space-x-2 mb-4">
+          <AlertCircle className="h-5 w-5 text-orange-400" />
+          <h3 className="text-lg font-semibold text-white">Missed Days</h3>
+        </div>
+        <div className="text-3xl font-bold text-orange-400 mb-2">{missed_days?.length || 0}</div>
+        <p className="text-gray-400 text-sm">Last entry: {last_entry_date ? new Date(last_entry_date).toLocaleDateString() : 'N/A'}</p>
       </div>
     </div>
   );
