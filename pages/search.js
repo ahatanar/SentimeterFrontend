@@ -19,11 +19,30 @@ export default function SearchPage() {
   const entriesPerPage = 10;
   const [user, setUser] = useState({ name: "User" }); // User state for NavBar
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Auth state for NavBar
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     setEntries([]);
     setCurrentPage(1);
+  };
+
+
+  const fetchEntriesBySemanticSearch = async () => {
+    if (!searchQuery) return alert("Please enter a search query.");
+    setLoading(true);
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/journals/search/semantic`, {
+        params: { query: searchQuery },
+        withCredentials: true,
+      });
+      setEntries(response.data.entries || []);
+    } catch (error) {
+      console.error(error.response?.data || error.message);
+      setEntries([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchEntriesByKeyword = async () => {
@@ -139,13 +158,32 @@ export default function SearchPage() {
           textColor="primary"
           indicatorColor="primary"
         >
+          <Tab label="Semantic Search" />
           <Tab label="Search by Keyword" />
           <Tab label="Search by Month/Year" />
           <Tab label="View All Entries" />
+          
         </Tabs>
 
+        {activeTab === 0 && (
+        <div>
+          <input
+            type="text"
+            placeholder="Enter keyword..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border border-gray-300 rounded p-2 w-full"
+          />
+          <button
+            onClick={fetchEntriesBySemanticSearch}
+            className="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-500"
+          >
+            Search
+          </button>
+        </div>
+      )}
         <div className="my-6">
-          {activeTab === 0 && (
+          {activeTab === 1 && (
             <div>
               <input
                 type="text"
@@ -163,7 +201,7 @@ export default function SearchPage() {
             </div>
           )}
 
-          {activeTab === 1 && (
+          {activeTab === 2 && (
             <div>
               <DatePicker
                 selected={date}
@@ -181,7 +219,7 @@ export default function SearchPage() {
             </div>
           )}
 
-          {activeTab === 2 && (
+          {activeTab === 3 && (
             <div>
               <button
                 onClick={fetchAllEntries}
