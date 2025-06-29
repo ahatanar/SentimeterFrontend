@@ -1,22 +1,12 @@
 import React from 'react';
 import { TrendingUp, Calendar, AlertCircle } from 'lucide-react';
 
-const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-function getIntensity(count) {
-  if (count === 0) return 'bg-gray-200';
-  if (count < 2) return 'bg-green-100';
-  if (count < 4) return 'bg-green-300';
-  if (count < 7) return 'bg-green-500';
-  return 'bg-green-700';
-}
-
 const JournalStreakCard = ({ streakData, loading, error }) => {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6 animate-pulse">
+          <div key={i} className="bg-[#1a1f36] rounded-xl border border-purple-500/20 p-6 animate-pulse">
             <div className="h-8 bg-gray-700 rounded mb-4 w-2/3" />
             <div className="h-10 bg-gray-700 rounded mb-2 w-1/3" />
             <div className="h-4 bg-gray-700 rounded w-1/2" />
@@ -28,7 +18,7 @@ const JournalStreakCard = ({ streakData, loading, error }) => {
 
   if (error) {
     return (
-      <div className="bg-red-500/10 backdrop-blur-sm rounded-xl border border-red-500/20 p-6 mb-8">
+      <div className="bg-red-500/10 backdrop-blur-sm rounded-xl border border-red-500/20 p-6">
         <p className="text-red-400">Error loading streak data: {error}</p>
       </div>
     );
@@ -41,35 +31,13 @@ const JournalStreakCard = ({ streakData, loading, error }) => {
     longest_streak,
     has_written_today,
     last_entry_date,
-    missed_days,
-    calendar_activity = {},
+    missed_days = []
   } = streakData;
 
-  // Prepare heatmap: assume calendar_activity is { 'YYYY-MM-DD': count }
-  // Show last 5 weeks (35 days)
-  const today = new Date();
-  const days = [];
-  for (let i = 34; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    days.push({
-      date: key,
-      count: calendar_activity[key] || 0,
-      day: d.getDay(),
-    });
-  }
-
-  // Group days by week
-  const weeks = [];
-  for (let i = 0; i < 35; i += 7) {
-    weeks.push(days.slice(i, i + 7));
-  }
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-      {/* Current Streak Card */}
-      <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Current Streak */}
+      <div className="bg-[#1a1f36] rounded-xl border border-purple-500/20 p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <TrendingUp className="h-5 w-5 text-green-400" />
@@ -85,8 +53,8 @@ const JournalStreakCard = ({ streakData, loading, error }) => {
         <p className="text-gray-400 text-sm">Keep it going!</p>
       </div>
 
-      {/* Longest Streak Card */}
-      <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+      {/* Longest Streak */}
+      <div className="bg-[#1a1f36] rounded-xl border border-purple-500/20 p-6">
         <div className="flex items-center space-x-2 mb-4">
           <Calendar className="h-5 w-5 text-blue-400" />
           <h3 className="text-lg font-semibold text-white">Longest Streak</h3>
@@ -95,14 +63,16 @@ const JournalStreakCard = ({ streakData, loading, error }) => {
         <p className="text-gray-400 text-sm">Personal best</p>
       </div>
 
-      {/* Missed Days Card */}
-      <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6">
+      {/* Missed Days */}
+      <div className="bg-[#1a1f36] rounded-xl border border-purple-500/20 p-6">
         <div className="flex items-center space-x-2 mb-4">
           <AlertCircle className="h-5 w-5 text-orange-400" />
           <h3 className="text-lg font-semibold text-white">Missed Days</h3>
         </div>
-        <div className="text-3xl font-bold text-orange-400 mb-2">{missed_days?.length || 0}</div>
-        <p className="text-gray-400 text-sm">Last entry: {last_entry_date ? new Date(last_entry_date).toLocaleDateString() : 'N/A'}</p>
+        <div className="text-3xl font-bold text-orange-400 mb-2">{missed_days.length}</div>
+        <p className="text-gray-400 text-sm">
+          Last entry: {last_entry_date ? new Date(last_entry_date).toLocaleDateString() : 'N/A'}
+        </p>
       </div>
     </div>
   );
