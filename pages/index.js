@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import JournalEntryCard from "./JournalEntryCard";
 import NavBar from "./NavBar";
+import JournalStreakCard from './JournalStreakCard';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -17,6 +18,9 @@ export default function Home() {
   const [newEntry, setNewEntry] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [streakData, setStreakData] = useState(null);
+  const [streakLoading, setStreakLoading] = useState(true);
+  const [streakError, setStreakError] = useState(null);
 
   const handleLogout = () => {
     document.cookie = "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
@@ -57,7 +61,21 @@ export default function Home() {
       }
     };
 
+    const fetchStreak = async () => {
+      setStreakLoading(true);
+      setStreakError(null);
+      try {
+        const response = await axios.get(`${BACKEND_URL}/api/journals/streak`, { withCredentials: true });
+        setStreakData(response.data);
+      } catch (error) {
+        setStreakError(error.response?.data?.error || 'Failed to fetch streak data');
+      } finally {
+        setStreakLoading(false);
+      }
+    };
+
     fetchUserData();
+    fetchStreak();
   }, []);
 
   const handleCreateEntry = async () => {
@@ -110,6 +128,7 @@ export default function Home() {
       <main className="flex flex-col items-center flex-grow py-10 px-6">
         {isAuthenticated ? (
           <>
+            <JournalStreakCard streakData={streakData} loading={streakLoading} error={streakError} />
             <h1 className="text-3xl font-bold mb-6">Welcome, {user?.name || "User"}!</h1>
             <h2 className="text-2xl font-semibold mb-4">Write Today's Journal Entry</h2>
             <TextField

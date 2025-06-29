@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import JournalStreakCard from './JournalStreakCard';
 
 const flaskBackendUrl = process.env.NEXT_PUBLIC_FLASK_BACKEND_URL;
 
@@ -7,6 +8,33 @@ const Dashboard = () => {
   const [date, setDate] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const [streakData, setStreakData] = useState(null);
+  const [streakLoading, setStreakLoading] = useState(true);
+  const [streakError, setStreakError] = useState(null);
+
+  useEffect(() => {
+    const fetchStreak = async () => {
+      setStreakLoading(true);
+      setStreakError(null);
+      try {
+        const token = localStorage.getItem('jwt_token');
+        const headers = { Authorization: `Bearer ${token}` };
+        const response = await fetch(`${flaskBackendUrl}/api/journals/streak`, { headers });
+        const data = await response.json();
+        if (response.ok) {
+          setStreakData(data);
+        } else {
+          setStreakError(data.error || 'Failed to fetch streak data');
+        }
+      } catch (err) {
+        setStreakError('An unexpected error occurred');
+      } finally {
+        setStreakLoading(false);
+      }
+    };
+    fetchStreak();
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -42,8 +70,9 @@ const Dashboard = () => {
   };
 
   return (
+    
     <div className="flex">
-      {/* Sidebar */}
+    <div style={{ background: 'red', color: 'white', padding: 20 }}>DASHBOARD TEST</div>
       <div className="w-1/4 bg-gray-800 text-white min-h-screen p-4">
         <h2 className="text-xl font-semibold mb-8">Journal Dashboard</h2>
         <ul>
@@ -64,6 +93,8 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div className="w-3/4 p-8">
+        <JournalStreakCard streakData={streakData} loading={streakLoading} error={streakError} />
+
         <h1 className="text-3xl font-bold mb-8">Create a New Journal Entry</h1>
 
         {/* Form for Creating Journal Entry */}
