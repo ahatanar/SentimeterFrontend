@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useRouter } from "next/router";
 import { Calendar, TrendingUp, Clock, AlertCircle, Home, BarChart3, Search, LogOut, Edit3, Brain, Target, Zap, Activity } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import NavBar from "./NavBar";
@@ -9,12 +10,13 @@ import "react-calendar-heatmap/dist/styles.css";
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function Insights() {
+  const router = useRouter();
   const [heatmapData, setHeatmapData] = useState({});
   const [sentimentData, setSentimentData] = useState({ last_month: [], last_week: [], last_year: [] });
   const [keywords, setKeywords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({ name: "User" });
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = checking, false = not authed, true = authed
 
   useEffect(() => {
     const fetchInsightsData = async () => {
@@ -25,33 +27,41 @@ export default function Insights() {
         });
         setUser(userResponse.data);
         setIsAuthenticated(true);
-
-        // Fetch heatmap data
-        const heatmapResponse = await axios.get(`${BACKEND_URL}/api/journals/heatmap`, {
-          withCredentials: true,
-        });
+        // Fetch other data only if authenticated
+        const heatmapResponse = await axios.get(`${BACKEND_URL}/api/journals/heatmap`, { withCredentials: true });
         setHeatmapData(heatmapResponse.data);
-
-        // Fetch sentiment data
-        const sentimentResponse = await axios.get(`${BACKEND_URL}/api/journals/sentiments`, {
-          withCredentials: true,
-        });
+        const sentimentResponse = await axios.get(`${BACKEND_URL}/api/journals/sentiments`, { withCredentials: true });
         setSentimentData(sentimentResponse.data);
-
-        // Fetch keywords data
-        const keywordsResponse = await axios.get(`${BACKEND_URL}/api/journals/keywords?top_n=10`, {
-          withCredentials: true,
-        });
+        const keywordsResponse = await axios.get(`${BACKEND_URL}/api/journals/keywords?top_n=10`, { withCredentials: true });
         setKeywords(keywordsResponse.data.keywords);
       } catch (error) {
-        console.error("Error fetching insights data:", error.response?.data || error.message);
+        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
     };
-
     fetchInsightsData();
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated === false) {
+      router.replace('/signin');
+    }
+  }, [isAuthenticated, router]);
+
+  if (isAuthenticated === null || (loading && isAuthenticated !== false)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
+          <p className="text-gray-300 text-lg">Loading insights...</p>
+        </div>
+      </div>
+    );
+  }
+  if (isAuthenticated === false) {
+    return null; // Will redirect
+  }
 
   const transformKeywordsData = (data) =>
     data.map(([keyword, frequency]) => ({ keyword, frequency }));
@@ -95,17 +105,6 @@ export default function Insights() {
     if (value.count === 3) return "color-github-3";
     return "color-github-4";
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
-          <p className="text-gray-300 text-lg">Loading insights...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">

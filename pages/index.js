@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Eye, Edit3, Trash2 } from 'lucide-react';
+import { Eye, Edit3, Trash2, BarChart3, Smile, Search } from 'lucide-react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import JournalEntryCard from "./JournalEntryCard";
@@ -165,7 +165,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex flex-col">
       <Head>
         <title>Sentimeter - Journal App</title>
         <style>{`
@@ -229,108 +229,44 @@ export default function Home() {
 
       <NavBar isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} />
 
-      <main className="container mx-auto px-4 py-8">
-        {isAuthenticated ? (
-          <>
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-              {/* Left Side - Streak Stats and Journal Entry */}
-              <div className="xl:col-span-3 space-y-8">
-                {/* Streak Stats */}
-                <JournalStreakCard streakData={streakData} loading={streakLoading} error={streakError} />
-
-                {/* Journal Entry Form */}
-                <div className="bg-[#0f1729] rounded-xl border border-purple-500/20 p-8">
-                  <div className="text-center mb-6">
-                    <h2 className="text-4xl font-bold text-white mb-2">Welcome, {user?.name}!</h2>
-                    <p className="text-2xl text-gray-400">Write Today's Journal Entry</p>
-                  </div>
-
-                  <form onSubmit={handleCreateEntry} className="space-y-4">
-                    <textarea
-                      value={journalEntry}
-                      onChange={(e) => setJournalEntry(e.target.value)}
-                      placeholder="Write about your day..."
-                      className="w-full h-48 bg-[#1a1f36] border-none rounded-xl p-6 text-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
-                      required
-                    />
-                    
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <DatePicker
-                        selected={selectedDate ? new Date(selectedDate) : null}
-                        onChange={(date) => setSelectedDate(date ? date.toISOString().split('T')[0] : '')}
-                        dateFormat="MMMM d, yyyy"
-                        placeholderText="Select a date"
-                        className="flex-1 bg-[#1a1f36] border-none rounded-xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                        calendarClassName="bg-[#1a1f36]"
-                      />
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                      >
-                        {submitting ? "SUBMITTING..." : "SUBMIT ENTRY"}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-
-                {/* Recent Entries */}
-                <div className="bg-[#0f1729] rounded-xl border border-purple-500/20 p-6">
-                  <h3 className="text-2xl font-bold text-white mb-6">Your Recent Journal Entries</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {entries.slice(0, 12).map((entry) => (
-                      <JournalEntryCard
-                        key={entry.entry_id}
-                        entry={entry}
-                        onDelete={handleDeleteClick}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Side - Activity Heatmap */}
-              <div className="xl:col-span-1">
-                <ActivityHeatmap 
-                  calendar_activity={streakData?.calendar_activity || {}} 
-                  missed_days={streakData?.missed_days || []}
-                />
-              </div>
-            </div>
-
-            {/* Delete Confirmation Modal */}
-            {showDeleteConfirm && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                <div className="bg-[#1a1f36] rounded-xl border border-purple-500/20 p-6 max-w-md w-full">
-                  <h3 className="text-xl font-semibold text-white mb-4">Delete Journal Entry?</h3>
-                  <p className="text-gray-300 mb-6">Are you sure you want to delete this journal entry? This action cannot be undone.</p>
-                  <div className="flex justify-end space-x-4">
-                    <button
-                      onClick={cancelDelete}
-                      className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={confirmDelete}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="text-center max-w-2xl mx-auto">
-            <h1 className="text-4xl font-bold mb-6">Welcome to Sentimeter</h1>
-            <p className="text-xl text-gray-300 mb-8">
-              Your personal journal with sentiment analysis and mood tracking.
-              Sign in to begin your journaling journey!
-            </p>
+      <main className="flex flex-col items-center justify-center flex-1 px-4 py-16 relative">
+        {/* Subtle background visual */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <svg width="100%" height="100%" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-20">
+            <path fill="#a78bfa" fillOpacity="0.2" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,133.3C840,107,960,85,1080,101.3C1200,117,1320,171,1380,197.3L1440,224L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z" />
+          </svg>
+        </div>
+        {/* Hero Section */}
+        <div className="relative z-10 bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-10 max-w-2xl w-full text-center shadow-lg">
+          <Edit3 className="h-10 w-10 text-purple-400 mx-auto mb-4" />
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
+            Welcome to Sentimeter
+          </h1>
+          <p className="text-lg text-gray-300 mb-8">
+            Your personal journal with sentiment analysis, mood tracking, and beautiful insights.
+          </p>
+          <a href="/signin" className="inline-block bg-gradient-to-r from-blue-400 to-purple-400 text-white px-8 py-3 rounded-lg font-semibold shadow hover:opacity-90 transition">
+            Get Started
+          </a>
+        </div>
+        {/* Feature Highlights */}
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-4xl w-full">
+          <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6 flex flex-col items-center text-center shadow">
+            <BarChart3 className="h-8 w-8 text-blue-400 mb-3" />
+            <h3 className="text-xl font-bold text-white mb-2">Powerful Insights</h3>
+            <p className="text-gray-300">Visualize your mood and sentiment trends with beautiful charts and heatmaps.</p>
           </div>
-        )}
+          <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6 flex flex-col items-center text-center shadow">
+            <Smile className="h-8 w-8 text-green-400 mb-3" />
+            <h3 className="text-xl font-bold text-white mb-2">Mood Tracking</h3>
+            <p className="text-gray-300">Track your emotional journey and discover patterns in your daily life.</p>
+          </div>
+          <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6 flex flex-col items-center text-center shadow">
+            <Search className="h-8 w-8 text-purple-400 mb-3" />
+            <h3 className="text-xl font-bold text-white mb-2">Smart Search</h3>
+            <p className="text-gray-300">Find past entries instantly with advanced search and keyword analysis.</p>
+          </div>
+        </div>
       </main>
     </div>
   );

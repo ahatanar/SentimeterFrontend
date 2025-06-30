@@ -21,29 +21,35 @@ const NavBar = ({ isAuthenticated, user, onLogout }) => {
             </Link>
           </div>
           <nav className="flex items-center space-x-4">
-            <button
-              onClick={() => router.push("/")}
-              className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${isActive("/")}`}
-            >
-              <Home className="h-4 w-4" />
-              <span>HOME</span>
-            </button>
+            {isAuthenticated && (
+              <button
+                onClick={() => router.push("/")}
+                className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${isActive("/")}`}
+              >
+                <Home className="h-4 w-4" />
+                <span>HOME</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => router.push("/insights")}
-              className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${isActive("/insights")}`}
-            >
-              <BarChart3 className="h-4 w-4" />
-              <span>INSIGHTS</span>
-            </button>
+            {isAuthenticated && (
+              <>
+                <button
+                  onClick={() => router.push("/insights")}
+                  className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${isActive("/insights")}`}
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  <span>INSIGHTS</span>
+                </button>
 
-            <button
-              onClick={() => router.push("/search")}
-              className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${isActive("/search")}`}
-            >
-              <Search className="h-4 w-4" />
-              <span>SEARCH</span>
-            </button>
+                <button
+                  onClick={() => router.push("/search")}
+                  className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${isActive("/search")}`}
+                >
+                  <Search className="h-4 w-4" />
+                  <span>SEARCH</span>
+                </button>
+              </>
+            )}
 
             {isAuthenticated && (
               <button
