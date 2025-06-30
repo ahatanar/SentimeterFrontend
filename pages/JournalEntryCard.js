@@ -1,114 +1,111 @@
-import React, { useState } from "react";
-import axios from "axios";
-import moment from "moment";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+import React, { useState } from 'react';
+import { ChevronDown, ChevronUp, Pencil, Trash2, Cloud, MapPin } from 'lucide-react';
 
 const JournalEntryCard = ({ entry, onDelete }) => {
-  const [expanded, setExpanded] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "Unknown Date";
-    return moment(dateString).format("MMMM Do, YYYY");
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    }).replace(/(\d+)(?=(,\s\d{4}))/, '$1th').split(',')[0];
   };
 
-  const truncateContent = (content, length) => {
-    if (!content) return "No content available.";
-    return content.length > length ? `${content.substring(0, length)}...` : content;
+  const truncateText = (text, maxLength = 60) => {
+    if (!text) return "";
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '...';
   };
 
-  const getSentimentColor = (sentimentScore) => {
-    if (!sentimentScore) return "bg-gray-100 border-gray-300"; 
-    const score = parseFloat(sentimentScore);
-    if (score < -0.5) return "bg-red-100 border-red-300";
-    if (score >= -0.5 && score <= 0.5) return "bg-yellow-100 border-yellow-300";
-    return "bg-green-100 border-green-300";
+  const getSentimentColor = (score) => {
+    if (!score) return "text-gray-400";
+    const numScore = parseFloat(score);
+    if (numScore <= -0.5) return "text-[#ff8080]";
+    if (numScore >= 0.5) return "text-[#4ade80]/80";
+    return "text-[#fbbf24]";
   };
 
-  const handleDelete = async () => {
-    setLoading(true);
-    try {
-      await axios.delete(`${BACKEND_URL}/api/journals/${entry?.entry_id}`, {
-        withCredentials: true,
-      });
-      if (onDelete) onDelete(entry?.entry_id);
-    } catch (error) {
-      console.error("Error deleting entry:", error.response?.data || error.message);
-    } finally {
-      setLoading(false);
-    }
+  const getSentimentText = (sentiment, score) => {
+    if (!sentiment || !score) return "neutral (0.00)";
+    return `${sentiment.toLowerCase()} (${parseFloat(score).toFixed(2)})`;
   };
 
-  if (!entry) {
-    return (
-      <div className="p-4 border rounded shadow-sm bg-gray-100">
-        <p className="text-gray-600">Invalid journal entry.</p>
-      </div>
-    );
-  }
+  const getYear = (timestamp) => {
+    return new Date(timestamp).getFullYear();
+  };
 
   return (
-    <div
-      className={`p-4 border rounded shadow-sm ${getSentimentColor(
-        entry.sentiment_score
-      )} transition-all`}
-    >
-      {/* Display Key Information */}
-      <div className="flex justify-between items-center">
-        <div>
-          <p className="text-gray-800 font-semibold">{formatDate(entry.timestamp)}</p>
-          <p className="text-sm text-gray-500">
-            Sentiment: {entry.sentiment || "Unknown"} (
-            {entry.sentiment_score ? parseFloat(entry.sentiment_score).toFixed(2) : "N/A"})
+    <div className="bg-[#1a1f36] rounded-xl p-6 border border-purple-500/20 h-full flex flex-col">
+      <div className="flex justify-between items-start">
+        <div className="space-y-2">
+          <h3 className="text-2xl font-semibold text-white">
+            {formatDate(entry.timestamp)},
+            <br />
+            {getYear(entry.timestamp)}
+          </h3>
+          <p className={`text-lg ${getSentimentColor(entry.sentiment_score)}`}>
+            Sentiment: {getSentimentText(entry.sentiment, entry.sentiment_score)}
           </p>
-          <p className="mt-2 text-gray-700">
-            {expanded ? entry.entry : truncateContent(entry.entry, 50)}
-          </p>
-          {!expanded && entry.keywords && entry.keywords.length > 0 && (
-            <p className="text-sm text-gray-500 mt-1">
-              <strong>Top Keyword:</strong> {entry.keywords[0]}
-            </p>
-          )}
         </div>
-        {/* Buttons */}
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition"
+        <div className="flex space-x-3">
+          <button 
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-gray-400 hover:text-white transition-colors"
           >
-            {expanded ? "Collapse" : "Expand"}
+            {isExpanded ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
           </button>
-          <button
-            onClick={handleDelete}
-            className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-500 transition ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            disabled={loading}
+          <button className="text-gray-400 hover:text-white transition-colors">
+            <Pencil className="w-5 h-5" />
+          </button>
+          <button 
+            onClick={() => onDelete(entry.entry_id)}
+            className="text-[#ff6b6b] hover:text-red-400 transition-colors"
           >
-            {loading ? "Deleting..." : "Delete"}
+            <Trash2 className="w-5 h-5" />
           </button>
         </div>
       </div>
+      
+      <p className="text-gray-300 text-lg mt-4 mb-3 flex-grow">
+        {isExpanded ? entry.entry : truncateText(entry.entry)}
+      </p>
 
-      {/* Expanded Details */}
-      {expanded && (
-        <div className="mt-4">
-          <p className="text-sm text-gray-500">
-            <strong>Weather:</strong> {entry.weather || "No weather data available"}
-          </p>
-          <p className="text-sm text-gray-500">
-            <strong>Keywords:</strong>{" "}
-            {entry.keywords && entry.keywords.length > 0
-              ? entry.keywords.slice(0, 3).join(", ")
-              : "No keywords available"}
-          </p>
-          <p className="text-sm text-gray-500">
-            <strong>Location:</strong>{" "}
-            {entry.location
-              ? `${entry.location.city || "Unknown"}, ${entry.location.country || "Unknown"}`
-              : "No location data available"}
-          </p>
+      {isExpanded && (
+        <div className="space-y-3 mt-4 border-t border-purple-500/20 pt-4">
+          {entry.weather && (
+            <div className="flex items-center space-x-2 text-gray-300">
+              <Cloud className="w-4 h-4 text-blue-400" />
+              <span>{entry.weather}</span>
+            </div>
+          )}
+          {entry.location && (
+            <div className="flex items-center space-x-2 text-gray-300">
+              <MapPin className="w-4 h-4 text-purple-400" />
+              <span>
+                {entry.location.city || "Unknown City"}
+                {entry.location.country && `, ${entry.location.country}`}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {entry.keywords && entry.keywords.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-4">
+          {entry.keywords.map((keyword, index) => (
+            <span 
+              key={index}
+              className="text-sm bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full"
+            >
+              {keyword}
+            </span>
+          ))}
         </div>
       )}
     </div>
