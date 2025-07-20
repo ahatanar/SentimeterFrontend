@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
-import { Bell, Save, Clock, Calendar, AlertCircle, CheckCircle, Home, BarChart3, Search, LogOut, Edit3 } from 'lucide-react';
+import { Bell, Save, Clock, Calendar, AlertCircle, CheckCircle, Home, BarChart3, Search, LogOut, Edit3, TrendingUp } from 'lucide-react';
 import NavBar from "./NavBar";
+import TabSwitcher from "../components/TabSwitcher";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -12,6 +13,7 @@ export default function Notifications() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('journal');
 
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -20,7 +22,10 @@ export default function Notifications() {
     journal_enabled: false,
     journal_frequency: 'daily',
     journal_time: '20:00',
-    journal_day: 'monday'
+    journal_day: 'monday',
+    survey_enabled: true,
+    survey_day: 'sunday',
+    survey_time: '18:00'
   });
 
   useEffect(() => {
@@ -47,7 +52,10 @@ export default function Notifications() {
             journal_enabled: savedSettings.journal_enabled ?? false,
             journal_frequency: savedSettings.journal_frequency || 'daily',
             journal_time: savedSettings.journal_time || '20:00',
-            journal_day: savedSettings.journal_day || 'monday'
+            journal_day: savedSettings.journal_day || 'monday',
+            survey_enabled: savedSettings.survey_enabled ?? true,
+            survey_day: savedSettings.survey_day || 'sunday',
+            survey_time: savedSettings.survey_time || '18:00'
           });
         }
       } catch (error) {
@@ -81,7 +89,12 @@ export default function Notifications() {
 
   const handleSaveSettings = async () => {
     if (!validateTimeFormat(settings.journal_time)) {
-      setMessage({ type: 'error', text: 'Please enter a valid time in HH:MM format (24-hour)' });
+      setMessage({ type: 'error', text: 'Please enter a valid journal reminder time in HH:MM format (24-hour)' });
+      return;
+    }
+
+    if (!validateTimeFormat(settings.survey_time)) {
+      setMessage({ type: 'error', text: 'Please enter a valid survey reminder time in HH:MM format (24-hour)' });
       return;
     }
 
@@ -113,7 +126,10 @@ export default function Notifications() {
           journal_enabled: savedSettings.journal_enabled ?? false,
           journal_frequency: savedSettings.journal_frequency || 'daily',
           journal_time: savedSettings.journal_time || '20:00',
-          journal_day: savedSettings.journal_day || 'monday'
+          journal_day: savedSettings.journal_day || 'monday',
+          survey_enabled: savedSettings.survey_enabled ?? true,
+          survey_day: savedSettings.survey_day || 'sunday',
+          survey_time: savedSettings.survey_time || '18:00'
         });
       }
     } catch (error) {
@@ -132,6 +148,20 @@ export default function Notifications() {
     setIsAuthenticated(false);
     setUser({ name: "User" });
   };
+
+  // Tab configuration
+  const tabs = [
+    {
+      id: 'journal',
+      label: 'Journal Reminders',
+      icon: Bell
+    },
+    {
+      id: 'survey',
+      label: 'Survey Reminders',
+      icon: TrendingUp
+    }
+  ];
 
   if (isAuthenticated === null || (loading && isAuthenticated !== false)) {
     return (
@@ -163,83 +193,158 @@ export default function Notifications() {
 
         {/* Settings Form */}
         <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-8">
+          {/* Tab Switcher */}
+          <TabSwitcher 
+            tabs={tabs} 
+            activeTab={activeTab} 
+            onTabChange={setActiveTab} 
+          />
+
           <div className="space-y-6">
-            {/* Enable Journal Reminders */}
-            <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
-              <div className="flex items-center space-x-3">
-                <Bell className="h-6 w-6 text-purple-400" />
-                <div>
-                  <h3 className="text-lg font-semibold text-white">Enable Journal Reminders</h3>
-                  <p className="text-gray-400 text-sm">Receive email reminders to write in your journal</p>
+            {/* Journal Reminders Tab */}
+            {activeTab === 'journal' && (
+              <>
+                {/* Enable Journal Reminders */}
+                <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                  <div className="flex items-center space-x-3">
+                    <Bell className="h-6 w-6 text-purple-400" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">Enable Journal Reminders</h3>
+                      <p className="text-gray-400 text-sm">Receive email reminders to write in your journal</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.journal_enabled}
+                      onChange={(e) => handleInputChange('journal_enabled', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  </label>
                 </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.journal_enabled}
-                  onChange={(e) => handleInputChange('journal_enabled', e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-              </label>
-            </div>
 
-            {/* Frequency Selection */}
-            <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
-              <div className="flex items-center space-x-3 mb-3">
-                <Calendar className="h-6 w-6 text-blue-400" />
-                <h3 className="text-lg font-semibold text-white">Reminder Frequency</h3>
-              </div>
-              <p className="text-gray-400 text-sm mb-4">How often would you like to receive reminders?</p>
-              <select
-                value={settings.journal_frequency}
-                onChange={(e) => handleInputChange('journal_frequency', e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              >
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-              </select>
-            </div>
-
-            {/* Day of Week Selection - Only show when Weekly */}
-            {settings.journal_frequency === 'weekly' && (
-              <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
-                <div className="flex items-center space-x-3 mb-3">
-                  <Calendar className="h-6 w-6 text-green-400" />
-                  <h3 className="text-lg font-semibold text-white">Day of Week</h3>
+                {/* Frequency Selection */}
+                <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <Calendar className="h-6 w-6 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">Reminder Frequency</h3>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-4">How often would you like to receive reminders?</p>
+                  <select
+                    value={settings.journal_frequency}
+                    onChange={(e) => handleInputChange('journal_frequency', e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                  </select>
                 </div>
-                <p className="text-gray-400 text-sm mb-4">Which day of the week should reminders be sent?</p>
-                <select
-                  value={settings.journal_day}
-                  onChange={(e) => handleInputChange('journal_day', e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value="monday">Monday</option>
-                  <option value="tuesday">Tuesday</option>
-                  <option value="wednesday">Wednesday</option>
-                  <option value="thursday">Thursday</option>
-                  <option value="friday">Friday</option>
-                  <option value="saturday">Saturday</option>
-                  <option value="sunday">Sunday</option>
-                </select>
-              </div>
+
+                {/* Day of Week Selection - Only show when Weekly */}
+                {settings.journal_frequency === 'weekly' && (
+                  <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <Calendar className="h-6 w-6 text-green-400" />
+                      <h3 className="text-lg font-semibold text-white">Day of Week</h3>
+                    </div>
+                    <p className="text-gray-400 text-sm mb-4">Which day of the week should reminders be sent?</p>
+                    <select
+                      value={settings.journal_day}
+                      onChange={(e) => handleInputChange('journal_day', e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    >
+                      <option value="monday">Monday</option>
+                      <option value="tuesday">Tuesday</option>
+                      <option value="wednesday">Wednesday</option>
+                      <option value="thursday">Thursday</option>
+                      <option value="friday">Friday</option>
+                      <option value="saturday">Saturday</option>
+                      <option value="sunday">Sunday</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Time Selection */}
+                <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <Clock className="h-6 w-6 text-green-400" />
+                    <h3 className="text-lg font-semibold text-white">Reminder Time</h3>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-4">What time should reminders be sent? (24-hour format)</p>
+                  <input
+                    type="time"
+                    value={settings.journal_time}
+                    onChange={(e) => handleInputChange('journal_time', e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="20:00"
+                  />
+                </div>
+              </>
             )}
 
-            {/* Time Selection */}
-            <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
-              <div className="flex items-center space-x-3 mb-3">
-                <Clock className="h-6 w-6 text-green-400" />
-                <h3 className="text-lg font-semibold text-white">Reminder Time</h3>
-              </div>
-              <p className="text-gray-400 text-sm mb-4">What time should reminders be sent? (24-hour format)</p>
-              <input
-                type="time"
-                value={settings.journal_time}
-                onChange={(e) => handleInputChange('journal_time', e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="20:00"
-              />
-            </div>
+            {/* Survey Reminders Tab */}
+            {activeTab === 'survey' && (
+              <>
+                {/* Enable Survey Reminders */}
+                <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                  <div className="flex items-center space-x-3">
+                    <Bell className="h-6 w-6 text-blue-400" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">Enable Survey Reminders</h3>
+                      <p className="text-gray-400 text-sm">Receive email reminders to complete weekly surveys</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.survey_enabled}
+                      onChange={(e) => handleInputChange('survey_enabled', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+
+                {/* Survey Day Selection */}
+                <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <Calendar className="h-6 w-6 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">Survey Day</h3>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-4">Which day of the week should survey reminders be sent?</p>
+                  <select
+                    value={settings.survey_day}
+                    onChange={(e) => handleInputChange('survey_day', e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="monday">Monday</option>
+                    <option value="tuesday">Tuesday</option>
+                    <option value="wednesday">Wednesday</option>
+                    <option value="thursday">Thursday</option>
+                    <option value="friday">Friday</option>
+                    <option value="saturday">Saturday</option>
+                    <option value="sunday">Sunday</option>
+                  </select>
+                </div>
+
+                {/* Survey Time Selection */}
+                <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <Clock className="h-6 w-6 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">Survey Reminder Time</h3>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-4">What time should survey reminders be sent? (24-hour format)</p>
+                  <input
+                    type="time"
+                    value={settings.survey_time}
+                    onChange={(e) => handleInputChange('survey_time', e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="18:00"
+                  />
+                </div>
+              </>
+            )}
 
             {/* Message Display */}
             {message.text && (

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
-import { Calendar, TrendingUp, Clock, AlertCircle, Home, BarChart3, Search, LogOut, Edit3, Brain, Target, Zap, Activity } from 'lucide-react';
+import { Calendar, TrendingUp, Clock, AlertCircle, Home, BarChart3, Search, LogOut, Edit3, Brain, Target, Zap, Activity, Plus } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import NavBar from "./NavBar";
 import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
+import WeeklySurveyModal from "./WeeklySurveyModal";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -14,9 +15,12 @@ export default function Insights() {
   const [heatmapData, setHeatmapData] = useState({});
   const [sentimentData, setSentimentData] = useState({ last_month: [], last_week: [], last_year: [] });
   const [keywords, setKeywords] = useState([]);
+  const [weeklySurveyStats, setWeeklySurveyStats] = useState(null);
+  const [weeklySurveyTrends, setWeeklySurveyTrends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({ name: "User" });
   const [isAuthenticated, setIsAuthenticated] = useState(null); // null = checking, false = not authed, true = authed
+  const [surveyModalOpen, setSurveyModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchInsightsData = async () => {
@@ -34,6 +38,21 @@ export default function Insights() {
         setSentimentData(sentimentResponse.data);
         const keywordsResponse = await axios.get(`${BACKEND_URL}/api/journals/keywords?top_n=10`, { withCredentials: true });
         setKeywords(keywordsResponse.data.keywords);
+        
+        // Fetch weekly survey data - temporarily disabled
+        // try {
+        //   const statsResponse = await axios.get(`${BACKEND_URL}/api/weekly-surveys/stats`, { withCredentials: true });
+        //   setWeeklySurveyStats(statsResponse.data);
+        // } catch (error) {
+        //   console.log('Weekly survey stats not available yet');
+        // }
+        
+        // try {
+        //   const trendsResponse = await axios.get(`${BACKEND_URL}/api/weekly-surveys/trends`, { withCredentials: true });
+        //   setWeeklySurveyTrends(trendsResponse.data);
+        // } catch (error) {
+        //   console.log('Weekly survey trends not available yet');
+        // }
       } catch (error) {
         setIsAuthenticated(false);
       } finally {
@@ -70,6 +89,23 @@ export default function Insights() {
     document.cookie = "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     setIsAuthenticated(false);
     setUser({ name: "User" });
+  };
+
+  const handleSurveyComplete = async () => {
+    // Refresh weekly survey data after completion
+    try {
+      const statsResponse = await axios.get(`${BACKEND_URL}/api/weekly-surveys/stats`, { withCredentials: true });
+      setWeeklySurveyStats(statsResponse.data);
+    } catch (error) {
+      console.log('Error refreshing survey stats');
+    }
+    
+    try {
+      const trendsResponse = await axios.get(`${BACKEND_URL}/api/weekly-surveys/trends`, { withCredentials: true });
+      setWeeklySurveyTrends(trendsResponse.data);
+    } catch (error) {
+      console.log('Error refreshing survey trends');
+    }
   };
 
   // Calculate insights from real data
@@ -276,6 +312,89 @@ export default function Insights() {
           </div>
         </div>
 
+        {/* Weekly Surveys Section */}
+        <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-8 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-2">
+              <TrendingUp className="h-6 w-6 text-green-400" />
+              <h3 className="text-2xl font-bold text-white">Weekly Surveys</h3>
+            </div>
+            <button
+              onClick={() => setSurveyModalOpen(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Take Survey</span>
+            </button>
+          </div>
+          
+          {weeklySurveyStats ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gray-800/50 rounded-lg border border-gray-700/50 p-4">
+                <div className="flex items-center space-x-3 mb-2">
+                  <Calendar className="h-5 w-5 text-blue-400" />
+                  <h4 className="text-sm font-medium text-gray-400">Total Surveys</h4>
+                </div>
+                <p className="text-2xl font-bold text-blue-400">{weeklySurveyStats.total_surveys || 0}</p>
+              </div>
+              
+              <div className="bg-gray-800/50 rounded-lg border border-gray-700/50 p-4">
+                <div className="flex items-center space-x-3 mb-2">
+                  <TrendingUp className="h-5 w-5 text-green-400" />
+                  <h4 className="text-sm font-medium text-gray-400">Completion Rate</h4>
+                </div>
+                <p className="text-2xl font-bold text-green-400">
+                  {weeklySurveyStats.completion_rate ? `${(weeklySurveyStats.completion_rate * 100).toFixed(1)}%` : '0%'}
+                </p>
+              </div>
+              
+              <div className="bg-gray-800/50 rounded-lg border border-gray-700/50 p-4">
+                <div className="flex items-center space-x-3 mb-2">
+                  <Clock className="h-5 w-5 text-purple-400" />
+                  <h4 className="text-sm font-medium text-gray-400">Last Survey</h4>
+                </div>
+                <p className="text-lg font-bold text-purple-400">
+                  {weeklySurveyStats.last_survey_date ? 
+                    new Date(weeklySurveyStats.last_survey_date).toLocaleDateString() : 'Never'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center text-gray-400 py-8">
+              <TrendingUp className="h-12 w-12 mx-auto mb-4 text-gray-600" />
+              <p className="text-lg">Weekly survey data will appear here once you complete your first survey.</p>
+            </div>
+          )}
+          
+          {weeklySurveyTrends.length > 0 && (
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-4">Survey Trends</h4>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={weeklySurveyTrends}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="week_start" stroke="#9CA3AF" fontSize={12} />
+                  <YAxis stroke="#9CA3AF" fontSize={12} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#1F2937', 
+                      border: '1px solid #10B981',
+                      borderRadius: '8px',
+                      color: '#F3F4F6'
+                    }} 
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="overall_score" 
+                    stroke="#10B981" 
+                    strokeWidth={2}
+                    dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+
         {/* Top Keywords */}
         <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-purple-500/20 p-8">
           <h3 className="text-2xl font-bold text-white mb-6 flex items-center space-x-2">
@@ -315,6 +434,14 @@ export default function Insights() {
           )}
         </div>
       </div>
+      
+      {/* Weekly Survey Modal */}
+      <WeeklySurveyModal
+        isOpen={surveyModalOpen}
+        onClose={() => setSurveyModalOpen(false)}
+        onSurveyComplete={handleSurveyComplete}
+      />
+      
       {/* Custom dark GitHub heatmap colors */}
       <style jsx global>{`
         .color-empty { fill: #23272e !important; background: #23272e !important; }
