@@ -39,10 +39,27 @@ const SurveyInsights = ({ weeklySurveyData, onTakeSurvey }) => {
   const computed = weeklySurveyData.computed;
 
   // Calculate current mood and trend
-  const currentMood = (weeklyData[weeklyData.length - 1].happiness + weeklyData[weeklyData.length - 1].satisfaction) / 2;
-  const previousMood = weeklyData.length > 1 ? 
-    (weeklyData[weeklyData.length - 2].happiness + weeklyData[weeklyData.length - 2].satisfaction) / 2 : currentMood;
+  const lastWeek = weeklyData[weeklyData.length - 1];
+  // Smart mood calculation: higher happiness/satisfaction, lower stress/anxiety
+  const currentMood = lastWeek
+    ? (lastWeek.happiness + lastWeek.satisfaction + (5 - lastWeek.stress) + (5 - lastWeek.anxiety)) / 4
+    : null;
+  const previousMood = weeklyData.length > 1 ?
+    ((weeklyData[weeklyData.length - 2].happiness + weeklyData[weeklyData.length - 2].satisfaction + (5 - weeklyData[weeklyData.length - 2].stress) + (5 - weeklyData[weeklyData.length - 2].anxiety)) / 4)
+    : currentMood;
   const moodTrend = currentMood > previousMood ? 'up' : currentMood < previousMood ? 'down' : 'stable';
+
+  // Mood message logic
+  let moodMessage = '';
+  if (currentMood == null) {
+    moodMessage = '';
+  } else if (currentMood >= 3.7) {
+    moodMessage = "You’re having a positive week.";
+  } else if (currentMood >= 2.3) {
+    moodMessage = "Your mood is steady this week.";
+  } else {
+    moodMessage = "This week feels a bit tough.";
+  }
 
   const highAlerts = weeklyData.filter(week => week.urgent).length;
   const completedWeeks = weeklyData.length;
@@ -100,15 +117,19 @@ const SurveyInsights = ({ weeklySurveyData, onTakeSurvey }) => {
         </div>
         {/* Center: Mood (duller, rounded rectangle) */}
         <div className="col-span-3 flex items-center justify-center">
-          <div className="bg-[#181f3a] rounded-2xl shadow-lg flex flex-col items-center justify-center py-6 px-4 min-w-[200px] min-h-[140px] max-w-xs mx-auto">
-            <div className="flex flex-col items-center">
-              <Heart className="w-7 h-7 text-pink-400 mb-1" />
-              <div className="text-xl font-bold text-white mb-1">This Week's Mood</div>
-              <div className="text-3xl font-extrabold text-white mb-1">{weeklySurveyData?.average_mood?.toFixed(1) ?? '-'}</div>
-              <div className="text-gray-400 mb-3 text-sm">out of 5.0</div>
+          <div className="bg-[#181f3a] rounded-lg shadow flex flex-col items-center justify-center py-2 px-2 min-w-[110px] min-h-[60px] max-w-[170px] mx-auto border border-blue-900/40">
+            <div className="flex flex-col items-center w-full">
+              <Heart className="w-5 h-5 text-pink-400 mb-1" />
+              <div className="text-sm font-semibold text-white mb-1">This Week's Mood</div>
+              <div className="text-xl font-extrabold text-white mb-1">{currentMood !== null ? currentMood.toFixed(1) : '-'}</div>
+              <div className="text-gray-400 mb-1 text-xs">out of 5.0</div>
+              {/* Concise mood message */}
+              <div className="text-xs text-gray-300 mb-2 text-center min-h-[16px]">{moodMessage}</div>
               {/* Render WeeklySurveyPrompt here, only if not completed */}
               {!weeklySurveyData?.completed && (
-                <WeeklySurveyPrompt onTakeSurvey={onTakeSurvey} />
+                <div className="w-full flex justify-center mt-1">
+                  <WeeklySurveyPrompt onTakeSurvey={onTakeSurvey} buttonClassName="px-3 py-1.5 text-sm rounded-md font-semibold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 max-w-[150px] w-full" />
+                </div>
               )}
             </div>
           </div>
@@ -349,15 +370,7 @@ const SurveyInsights = ({ weeklySurveyData, onTakeSurvey }) => {
       </div>
 
       {/* Action Button */}
-      <div className="flex justify-center mt-8">
-        <button 
-          onClick={onTakeSurvey}
-          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-200 transform hover:scale-105"
-        >
-          <Plus className="inline w-4 h-4 mr-2" />
-          Take This Week's Survey
-        </button>
-      </div>
+      {/* Removed the extra Take This Week's Survey button at the bottom */}
     </div>
   );
 };

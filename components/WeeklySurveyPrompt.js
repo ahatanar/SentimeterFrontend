@@ -30,11 +30,11 @@ const WeeklySurveyPrompt = ({ onTakeSurvey, className = '' }) => {
   return (
     <button
       onClick={onTakeSurvey}
-      className={`flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-lg rounded-xl shadow-md transition-all duration-150 ${className}`}
-      style={{ minWidth: 0, maxWidth: 340 }}
+      className={`flex items-center justify-center gap-2 px-3 py-1.5 bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white font-semibold text-sm rounded-md border border-green-600 shadow-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-green-400/60 active:scale-95 active:shadow-none ${className}`}
+      style={{ minWidth: 0, maxWidth: 220 }}
       aria-label="Take This Week's Survey"
     >
-      <Plus className="w-5 h-5" />
+      <Plus className="w-4 h-4" />
       <span>Take This Week's Survey</span>
     </button>
   );
