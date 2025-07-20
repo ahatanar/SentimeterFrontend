@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Home, BarChart3, Search, LogOut, Edit3 } from 'lucide-react';
+import { Home, BarChart3, Search, LogOut, Edit3, Bell } from 'lucide-react';
 
 const NavBar = ({ isAuthenticated, user, onLogout }) => {
   const router = useRouter();
@@ -47,6 +47,14 @@ const NavBar = ({ isAuthenticated, user, onLogout }) => {
                 >
                   <Search className="h-4 w-4" />
                   <span>SEARCH</span>
+                </button>
+
+                <button
+                  onClick={() => router.push("/notifications")}
+                  className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${isActive("/notifications")}`}
+                >
+                  <Bell className="h-4 w-4" />
+                  <span>NOTIFICATIONS</span>
                 </button>
               </>
             )}
