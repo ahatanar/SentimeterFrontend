@@ -9,6 +9,7 @@ import NavBar from "./NavBar";
 import JournalStreakCard from './JournalStreakCard';
 import ActivityHeatmap from './ActivityHeatmap';
 import About from '../components/About';
+import WeeklySurveyPrompt from '../components/WeeklySurveyPrompt';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 

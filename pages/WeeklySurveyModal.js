@@ -60,6 +60,19 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
     setSelectedWeek(weeks[0]); // Default to current week
   };
 
+  // Helper to format week label as 'Mon, Jul 14 – Sun, Jul 20'
+  function formatWeekLabel(week, idx) {
+    const start = new Date(week.week_start);
+    const end = new Date(week.week_end);
+    const options = { month: 'short', day: 'numeric', weekday: 'short' };
+    const startStr = start.toLocaleDateString(undefined, options);
+    const endStr = end.toLocaleDateString(undefined, options);
+    if (idx === 0) {
+      return `This week: ${startStr} – ${endStr}`;
+    }
+    return `${startStr} – ${endStr}`;
+  }
+
   const handleInputChange = (field, value) => {
     setSurveyData(prev => ({
       ...prev,
@@ -151,9 +164,9 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
             }}
             className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           >
-            {availableWeeks.map((week) => (
+            {availableWeeks.map((week, idx) => (
               <option key={week.week_start} value={week.week_start}>
-                {week.label}
+                {formatWeekLabel(week, idx)}
               </option>
             ))}
           </select>
@@ -161,7 +174,7 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
 
         {/* Survey Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Slider Questions - 1-5 Likert scales */}
+          {/* Slider Questions - 1-5 Likert scales (sliders) */}
           <div className="space-y-4">
             <div>
               <label className="block text-white font-medium mb-2">How stressed were you this week?</label>
@@ -171,7 +184,7 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
                 max="5"
                 value={surveyData.stress}
                 onChange={(e) => handleInputChange('stress', parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider slider-stress"
               />
               <div className="flex justify-between text-sm text-gray-400 mt-1">
                 <span>Not at all</span>
@@ -188,7 +201,7 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
                 max="5"
                 value={surveyData.anxiety}
                 onChange={(e) => handleInputChange('anxiety', parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider slider-anxiety"
               />
               <div className="flex justify-between text-sm text-gray-400 mt-1">
                 <span>Not at all</span>
@@ -205,7 +218,7 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
                 max="5"
                 value={surveyData.depression}
                 onChange={(e) => handleInputChange('depression', parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider slider-depression"
               />
               <div className="flex justify-between text-sm text-gray-400 mt-1">
                 <span>Not at all</span>
@@ -222,7 +235,7 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
                 max="5"
                 value={surveyData.happiness}
                 onChange={(e) => handleInputChange('happiness', parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider slider-happiness"
               />
               <div className="flex justify-between text-sm text-gray-400 mt-1">
                 <span>Not at all</span>
@@ -239,7 +252,7 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
                 max="5"
                 value={surveyData.satisfaction}
                 onChange={(e) => handleInputChange('satisfaction', parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider slider-satisfaction"
               />
               <div className="flex justify-between text-sm text-gray-400 mt-1">
                 <span>Not at all</span>
@@ -345,6 +358,63 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
           background: #8b5cf6;
           cursor: pointer;
           border: 2px solid #1f2937;
+        }
+        /* Stress - yellow */
+        .slider-stress::-webkit-slider-thumb { background: #eab308; }
+        .slider-stress::-moz-range-thumb { background: #eab308; }
+        .slider-stress::-ms-thumb { background: #eab308; }
+        .slider-stress::-webkit-slider-thumb { border-color: #eab308; }
+        .slider-stress::-moz-range-thumb { border-color: #eab308; }
+        .slider-stress::-ms-thumb { border-color: #eab308; }
+        .slider-stress::-webkit-slider-runnable-track { background: #eab30833; }
+        .slider-stress::-moz-range-track { background: #eab30833; }
+        .slider-stress::-ms-fill-lower { background: #eab30833; }
+        /* Anxiety - red */
+        .slider-anxiety::-webkit-slider-thumb { background: #ef4444; }
+        .slider-anxiety::-moz-range-thumb { background: #ef4444; }
+        .slider-anxiety::-ms-thumb { background: #ef4444; }
+        .slider-anxiety::-webkit-slider-thumb { border-color: #ef4444; }
+        .slider-anxiety::-moz-range-thumb { border-color: #ef4444; }
+        .slider-anxiety::-ms-thumb { border-color: #ef4444; }
+        .slider-anxiety::-webkit-slider-runnable-track { background: #ef444433; }
+        .slider-anxiety::-moz-range-track { background: #ef444433; }
+        .slider-anxiety::-ms-fill-lower { background: #ef444433; }
+        /* Depression - purple */
+        .slider-depression::-webkit-slider-thumb { background: #a855f7; }
+        .slider-depression::-moz-range-thumb { background: #a855f7; }
+        .slider-depression::-ms-thumb { background: #a855f7; }
+        .slider-depression::-webkit-slider-thumb { border-color: #a855f7; }
+        .slider-depression::-moz-range-thumb { border-color: #a855f7; }
+        .slider-depression::-ms-thumb { border-color: #a855f7; }
+        .slider-depression::-webkit-slider-runnable-track { background: #a855f733; }
+        .slider-depression::-moz-range-track { background: #a855f733; }
+        .slider-depression::-ms-fill-lower { background: #a855f733; }
+        /* Happiness - green */
+        .slider-happiness::-webkit-slider-thumb { background: #10b981; }
+        .slider-happiness::-moz-range-thumb { background: #10b981; }
+        .slider-happiness::-ms-thumb { background: #10b981; }
+        .slider-happiness::-webkit-slider-thumb { border-color: #10b981; }
+        .slider-happiness::-moz-range-thumb { border-color: #10b981; }
+        .slider-happiness::-ms-thumb { border-color: #10b981; }
+        .slider-happiness::-webkit-slider-runnable-track { background: #10b98133; }
+        .slider-happiness::-moz-range-track { background: #10b98133; }
+        .slider-happiness::-ms-fill-lower { background: #10b98133; }
+        /* Satisfaction - blue */
+        .slider-satisfaction::-webkit-slider-thumb { background: #3b82f6; }
+        .slider-satisfaction::-moz-range-thumb { background: #3b82f6; }
+        .slider-satisfaction::-ms-thumb { background: #3b82f6; }
+        .slider-satisfaction::-webkit-slider-thumb { border-color: #3b82f6; }
+        .slider-satisfaction::-moz-range-thumb { border-color: #3b82f6; }
+        .slider-satisfaction::-ms-thumb { border-color: #3b82f6; }
+        .slider-satisfaction::-webkit-slider-runnable-track { background: #3b82f633; }
+        .slider-satisfaction::-moz-range-track { background: #3b82f633; }
+        .slider-satisfaction::-ms-fill-lower { background: #3b82f633; }
+        .custom-scrollbar::-webkit-scrollbar {
+          height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #374151;
+          border-radius: 6px;
         }
       `}</style>
     </div>
