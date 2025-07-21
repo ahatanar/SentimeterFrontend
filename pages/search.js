@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { Tabs, Tab } from "@mui/material";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import ModernDatePicker from "../components/ModernDatePicker";
 import moment from "moment";
 import JournalEntryCard from "./JournalEntryCard";
 import NavBar from "./NavBar";
@@ -15,7 +14,7 @@ export default function SearchPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
   const [keyword, setKeyword] = useState("");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(null);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -218,12 +217,10 @@ export default function SearchPage() {
               )}
               {activeTab === 2 && (
                 <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-                  <DatePicker
-                    selected={date}
-                    onChange={(selectedDate) => setDate(selectedDate)}
-                    dateFormat="MM/yyyy"
-                    showMonthYearPicker
-                    className="flex-1 bg-gray-900/60 border border-purple-500/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  <ModernDatePicker
+                    value={date}
+                    onChange={setDate}
+                    placeholder="Select a date"
                   />
                   <button
                     onClick={fetchEntriesByDate}
