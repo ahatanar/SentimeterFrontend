@@ -2,8 +2,7 @@ import Head from "next/head";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Eye, Edit3, Trash2 } from 'lucide-react';
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import ModernDatePicker from "../components/ModernDatePicker";
 import JournalEntryCard from "./JournalEntryCard";
 import NavBar from "./NavBar";
 import JournalStreakCard from './JournalStreakCard';
@@ -20,18 +19,42 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [journalEntry, setJournalEntry] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
+  const [dateValue, setDateValue] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [streakData, setStreakData] = useState(null);
   const [streakLoading, setStreakLoading] = useState(true);
   const [streakError, setStreakError] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
+  const [location, setLocation] = useState(null);
 
   const handleLogout = () => {
     document.cookie = "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     setIsAuthenticated(false);
     setUser({ name: "User" });
     setEntries([]);
+  };
+
+  // Helper to get location (returns a Promise)
+  const getLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        resolve(null);
+      } else {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            resolve({
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude
+            });
+          },
+          (err) => {
+            resolve(null); // If denied or error, just resolve null
+          },
+          { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+        );
+      }
+    });
   };
 
   useEffect(() => {
@@ -89,12 +112,19 @@ export default function Home() {
 
     setSubmitting(true);
     try {
+      // Try to get location before submitting
+      const loc = await getLocation();
+      setLocation(loc); // Save for possible UI use
+      const requestBody = {
+        entry: journalEntry,
+        date: selectedDate || undefined,
+      };
+      if (loc) {
+        requestBody.location = loc;
+      }
       const response = await axios.post(
         `${BACKEND_URL}/api/journals`,
-        {
-          entry: journalEntry,
-          date: selectedDate || undefined,
-        },
+        requestBody,
         { withCredentials: true }
       );
 
@@ -179,63 +209,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-900 text-white">
       <Head>
         <title>Sentimeter - Journal App</title>
-        <style>{`
-          .react-datepicker {
-            background-color: #1a1f36;
-            border: 1px solid rgba(168, 85, 247, 0.2);
-            border-radius: 0.75rem;
-            font-family: inherit;
-          }
-          .react-datepicker__header {
-            background-color: #151929;
-            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
-            border-top-left-radius: 0.75rem;
-            border-top-right-radius: 0.75rem;
-            padding-top: 1rem;
-          }
-          .react-datepicker__month {
-            background-color: #1a1f36;
-            margin: 0.4rem;
-            text-align: center;
-          }
-          .react-datepicker__day-name, .react-datepicker__day {
-            color: #fff;
-            margin: 0.2rem;
-            width: 2rem;
-            height: 2rem;
-            line-height: 2rem;
-            border-radius: 0.5rem;
-          }
-          .react-datepicker__day:hover {
-            background-color: rgba(168, 85, 247, 0.2);
-          }
-          .react-datepicker__day--selected {
-            background-color: #6366f1 !important;
-            color: white !important;
-          }
-          .react-datepicker__day--keyboard-selected {
-            background-color: rgba(168, 85, 247, 0.4);
-          }
-          .react-datepicker__day--outside-month {
-            color: #6b7280;
-          }
-          .react-datepicker__current-month {
-            color: #fff;
-            font-weight: bold;
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-          }
-          .react-datepicker__navigation {
-            top: 1rem;
-          }
-          .react-datepicker__navigation-icon::before {
-            border-color: #fff;
-          }
-          .react-datepicker__day--today {
-            font-weight: bold;
-            color: #6366f1;
-          }
-        `}</style>
+        {/* No custom styles needed for react-tailwindcss-datepicker */}
       </Head>
 
       <NavBar isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} />
@@ -264,15 +238,14 @@ export default function Home() {
                       className="w-full h-48 bg-[#1a1f36] border-none rounded-xl p-6 text-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
                       required
                     />
-                    
                     <div className="flex flex-col sm:flex-row gap-4">
-                      <DatePicker
-                        selected={selectedDate ? new Date(selectedDate) : null}
-                        onChange={(date) => setSelectedDate(date ? date.toISOString().split('T')[0] : '')}
-                        dateFormat="MMMM d, yyyy"
-                        placeholderText="Select a date"
-                        className="flex-1 bg-[#1a1f36] border-none rounded-xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                        calendarClassName="bg-[#1a1f36]"
+                      <ModernDatePicker
+                        value={dateValue}
+                        onChange={(date) => {
+                          setDateValue(date);
+                          setSelectedDate(date ? date.toISOString().split('T')[0] : "");
+                        }}
+                        placeholder="Select a date"
                       />
                       <button
                         type="submit"
