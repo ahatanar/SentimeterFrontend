@@ -1,9 +1,9 @@
 import Head from "next/head";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Eye, Edit3, Trash2 } from 'lucide-react';
 import ModernDatePicker from "../components/ModernDatePicker";
-import JournalEntryCard from "./JournalEntryCard";
+import JournalEntryCard from "../components/JournalEntryCard";
 import NavBar from "./NavBar";
 import JournalStreakCard from './JournalStreakCard';
 import ActivityHeatmap from './ActivityHeatmap';
@@ -11,6 +11,8 @@ import About from '../components/About';
 import WeeklySurveyPrompt from '../components/WeeklySurveyPrompt';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const pollIntervalMs = 3000;
+const maxPolls = 20;
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -27,6 +29,7 @@ export default function Home() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
   const [location, setLocation] = useState(null);
+  const pollRefs = useRef({}); // Track polling intervals by entry_id
 
   const handleLogout = () => {
     document.cookie = "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
@@ -56,6 +59,35 @@ export default function Home() {
       }
     });
   };
+
+  // Helper: Start polling for a single entry by ID
+  const startPollingEntry = (entry_id) => {
+    let pollCount = 0;
+    if (pollRefs.current[entry_id]) return; // Already polling
+    pollRefs.current[entry_id] = setInterval(async () => {
+      pollCount++;
+      // Polling request removed for now. Add retry logic here later if needed.
+      if (pollCount >= maxPolls) {
+        clearInterval(pollRefs.current[entry_id]);
+        delete pollRefs.current[entry_id];
+      }
+    }, pollIntervalMs);
+  };
+
+  // Clean up polling if entry is deleted
+  useEffect(() => {
+    return () => {
+      Object.values(pollRefs.current).forEach(clearInterval);
+      pollRefs.current = {};
+    };
+  }, []);
+
+  // Start polling for any entries with processing: true on mount or entries change
+  useEffect(() => {
+    entries.forEach((entry) => {
+      if (entry.processing) startPollingEntry(entry.entry_id);
+    });
+  }, [entries]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -131,6 +163,7 @@ export default function Home() {
       const newEntryData = response.data.entry;
       if (newEntryData && newEntryData.entry_id) {
         setEntries([newEntryData, ...entries.slice(0, 11)]);
+        if (newEntryData.processing) startPollingEntry(newEntryData.entry_id);
         setJournalEntry("");
         setSelectedDate("");
         
@@ -159,6 +192,11 @@ export default function Home() {
       });
       setEntries((prevEntries) => prevEntries.filter((entry) => entry.entry_id !== entryToDelete));
       
+      // Clean up polling for deleted entry
+      if (pollRefs.current[entryToDelete]) {
+        clearInterval(pollRefs.current[entryToDelete]);
+        delete pollRefs.current[entryToDelete];
+      }
       // Refresh streak data after deletion
       const streakResponse = await axios.get(`${BACKEND_URL}/api/journals/streak`, { withCredentials: true });
       setStreakData(streakResponse.data);

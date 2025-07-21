@@ -71,7 +71,13 @@ const JournalEntryCard = ({ entry, onDelete }) => {
           </button>
         </div>
       </div>
-      
+      {/* Analyzing indicator */}
+      {entry.processing && (
+        <div className="flex items-center gap-2 text-purple-300 text-sm font-medium mb-2 mt-2">
+          <svg className="animate-spin h-4 w-4 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+          Analyzing…
+        </div>
+      )}
       <p className="text-gray-300 text-lg mt-4 mb-3 flex-grow">
         {isExpanded ? entry.entry : truncateText(entry.entry)}
       </p>
@@ -81,7 +87,14 @@ const JournalEntryCard = ({ entry, onDelete }) => {
           {entry.weather && (
             <div className="flex items-center space-x-2 text-gray-300">
               <Cloud className="w-4 h-4 text-blue-400" />
-              <span>{entry.weather}</span>
+              <span>
+                {typeof entry.weather === 'object' && entry.weather !== null
+                  ? `${entry.weather.description || ''}` +
+                    (entry.weather.temperature ? `, ${entry.weather.temperature}°C` : '') +
+                    (entry.weather.humidity ? `, ${entry.weather.humidity}% humidity` : '') +
+                    (entry.weather.wind_speed ? `, ${entry.weather.wind_speed} km/h wind` : '')
+                  : entry.weather}
+              </span>
             </div>
           )}
           {entry.location && (
@@ -112,4 +125,4 @@ const JournalEntryCard = ({ entry, onDelete }) => {
   );
 };
 
-export default JournalEntryCard;
+export default JournalEntryCard; 

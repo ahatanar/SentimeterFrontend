@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { Tabs, Tab } from "@mui/material";
 import ModernDatePicker from "../components/ModernDatePicker";
 import moment from "moment";
-import JournalEntryCard from "./JournalEntryCard";
+import JournalEntryCard from "../components/JournalEntryCard";
 import NavBar from "./NavBar";
 import { Search as SearchIcon, Calendar as CalendarIcon, List as ListIcon, BookOpenText, Loader2 } from 'lucide-react';
 
