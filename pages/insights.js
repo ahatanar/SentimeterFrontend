@@ -32,26 +32,42 @@ export default function Insights() {
         });
         setUser(userResponse.data);
         setIsAuthenticated(true);
-        // Fetch other data only if authenticated
-        const heatmapResponse = await axios.get(`${BACKEND_URL}/api/journals/heatmap`, { withCredentials: true });
-        setHeatmapData(heatmapResponse.data);
-        const sentimentResponse = await axios.get(`${BACKEND_URL}/api/journals/sentiments`, { withCredentials: true });
-        setSentimentData(sentimentResponse.data);
-        const keywordsResponse = await axios.get(`${BACKEND_URL}/api/journals/keywords?top_n=10`, { withCredentials: true });
-        setKeywords(keywordsResponse.data.keywords);
-        
-        // Fetch weekly survey data
-        try {
-          const surveyResponse = await axios.get(`${BACKEND_URL}/api/weekly-surveys/summary?weeks=12`, { withCredentials: true });
-          setWeeklySurveyData(surveyResponse.data);
-        } catch (error) {
-          console.log('Weekly survey data not available yet:', error.message);
-        }
       } catch (error) {
         setIsAuthenticated(false);
-      } finally {
         setLoading(false);
+        return; 
       }
+
+      try {
+        const heatmapResponse = await axios.get(`${BACKEND_URL}/api/journals/heatmap`, { withCredentials: true });
+        setHeatmapData(heatmapResponse.data);
+      } catch (error) {
+        console.log('Heatmap data not available:', error.message);
+      }
+
+      try {
+        const sentimentResponse = await axios.get(`${BACKEND_URL}/api/journals/sentiments`, { withCredentials: true });
+        setSentimentData(sentimentResponse.data);
+      } catch (error) {
+        console.log('Sentiment data not available:', error.message);
+      }
+
+      try {
+        const keywordsResponse = await axios.get(`${BACKEND_URL}/api/journals/keywords?top_n=10`, { withCredentials: true });
+        setKeywords(keywordsResponse.data.keywords);
+      } catch (error) {
+        console.log('Keywords data not available:', error.message);
+      }
+        
+      // Fetch weekly survey data
+      try {
+        const surveyResponse = await axios.get(`${BACKEND_URL}/api/weekly-surveys/summary?weeks=12`, { withCredentials: true });
+        setWeeklySurveyData(surveyResponse.data);
+      } catch (error) {
+        console.log('Weekly survey data not available yet:', error.message);
+      }
+
+      setLoading(false);
     };
     fetchInsightsData();
   }, []);
