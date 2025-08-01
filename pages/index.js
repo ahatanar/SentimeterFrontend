@@ -32,7 +32,7 @@ export default function Home() {
   const pollRefs = useRef({}); // Track polling intervals by entry_id
 
   const handleLogout = () => {
-    document.cookie = "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    document.cookie = "access_token_cookie=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     setIsAuthenticated(false);
     setUser({ name: "User" });
     setEntries([]);

@@ -5,8 +5,7 @@ const JournalEntryCard = ({ entry, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', {
+    return new Date(timestamp).toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric'
