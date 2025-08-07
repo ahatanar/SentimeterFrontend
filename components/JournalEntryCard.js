@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Pencil, Trash2, Cloud, MapPin } from 'lucide-react';
+import { formatDateLocalNoYear, getYearLocal } from '../utils/dateUtils';
 
 const JournalEntryCard = ({ entry, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const formatDate = (timestamp) => {
-    return new Date(timestamp).toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
-    }).replace(/(\d+)(?=(,\s\d{4}))/, '$1th').split(',')[0];
+    return formatDateLocalNoYear(timestamp);
   };
 
   const truncateText = (text, maxLength = 60) => {
@@ -32,7 +29,7 @@ const JournalEntryCard = ({ entry, onDelete }) => {
   };
 
   const getYear = (timestamp) => {
-    return new Date(timestamp).getFullYear();
+    return getYearLocal(timestamp);
   };
 
   return (

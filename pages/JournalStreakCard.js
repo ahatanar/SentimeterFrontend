@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, Calendar, AlertCircle } from 'lucide-react';
+import { formatDateTimeLocal } from '../utils/dateUtils';
 
 const JournalStreakCard = ({ streakData, loading, error }) => {
   if (loading) {
@@ -71,7 +72,7 @@ const JournalStreakCard = ({ streakData, loading, error }) => {
         </div>
         <div className="text-3xl font-bold text-orange-400 mb-2">{missed_days.length}</div>
         <p className="text-gray-400 text-sm">
-          Last entry: {last_entry_date ? new Date(last_entry_date).toLocaleString() : 'N/A'}
+          Last entry: {last_entry_date ? formatDateTimeLocal(last_entry_date) : 'N/A'}
         </p>
       </div>
     </div>

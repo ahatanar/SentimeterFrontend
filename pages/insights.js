@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { Calendar, TrendingUp, Clock, AlertCircle, Home, BarChart3, Search, LogOut, Edit3, Brain, Target, Zap, Activity, Plus } from 'lucide-react';
+import { getDay } from 'date-fns';
 import NavBar from "./NavBar";
 import TabSwitcher from "../components/TabSwitcher";
 import JournalInsights from "../components/JournalInsights";
@@ -135,7 +136,7 @@ export default function Insights() {
   // Calculate most active day of the week
   const weekdayTotals = [0, 0, 0, 0, 0, 0, 0]; // Sun-Sat
   Object.entries(heatmapData).forEach(([date, count]) => {
-    const day = new Date(date).getDay(); // 0 (Sun) - 6 (Sat)
+    const day = getDay(new Date(date + 'T00:00:00')); // 0 (Sun) - 6 (Sat)
     weekdayTotals[day] += count;
   });
   const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

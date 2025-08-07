@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { X, Calendar, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react';
+import { format } from 'date-fns';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -62,11 +63,10 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
 
   // Helper to format week label as 'Mon, Jul 14 – Sun, Jul 20'
   function formatWeekLabel(week, idx) {
-    const start = new Date(week.week_start);
-    const end = new Date(week.week_end);
-    const options = { month: 'short', day: 'numeric', weekday: 'short' };
-    const startStr = start.toLocaleDateString(undefined, options);
-    const endStr = end.toLocaleDateString(undefined, options);
+    const start = new Date(week.week_start + 'T00:00:00');
+    const end = new Date(week.week_end + 'T00:00:00');
+    const startStr = format(start, 'EEE, MMM d');
+    const endStr = format(end, 'EEE, MMM d');
     if (idx === 0) {
       return `This week: ${startStr} – ${endStr}`;
     }

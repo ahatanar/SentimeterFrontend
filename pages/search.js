@@ -3,7 +3,7 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { Tabs, Tab } from "@mui/material";
 import ModernDatePicker from "../components/ModernDatePicker";
-import moment from "moment";
+import { getYear, getMonth } from "date-fns";
 import JournalEntryCard from "../components/JournalEntryCard";
 import NavBar from "./NavBar";
 import { Search as SearchIcon, Calendar as CalendarIcon, List as ListIcon, BookOpenText, Loader2 } from 'lucide-react';
@@ -82,8 +82,8 @@ export default function SearchPage() {
   };
 
   const fetchEntriesByDate = async () => {
-    const year = moment(date).year();
-    const month = moment(date).month() + 1;
+    const year = getYear(date);
+    const month = getMonth(date) + 1;
     setLoading(true);
     try {
       const response = await axios.get(`${BACKEND_URL}/api/journals/search/date`, {
