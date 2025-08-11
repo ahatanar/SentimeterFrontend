@@ -281,7 +281,13 @@ export default function Home() {
                         value={dateValue}
                         onChange={(date) => {
                           setDateValue(date);
-                          setSelectedDate(date ? date.toISOString().split('T')[0] : "");
+                          if (date) {
+                            // Create a date at noon in local timezone to avoid timezone conversion issues
+                            const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+                            setSelectedDate(localDate.toISOString().split('T')[0]);
+                          } else {
+                            setSelectedDate("");
+                          }
                         }}
                         placeholder="Select a date"
                       />

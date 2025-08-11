@@ -45,15 +45,16 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
       const monday = new Date(date);
       monday.setDate(date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
       
-      const weekStart = monday.toISOString().split('T')[0];
+      // Create dates at noon in local timezone to avoid timezone conversion issues
+      const weekStart = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate(), 12, 0, 0);
       const weekEnd = new Date(monday);
       weekEnd.setDate(monday.getDate() + 6);
-      const weekEndStr = weekEnd.toISOString().split('T')[0];
+      const weekEndLocal = new Date(weekEnd.getFullYear(), weekEnd.getMonth(), weekEnd.getDate(), 12, 0, 0);
       
       weeks.push({
-        week_start: weekStart,
-        week_end: weekEndStr,
-        label: `${weekStart} → ${weekEndStr}`
+        week_start: weekStart.toISOString().split('T')[0],
+        week_end: weekEndLocal.toISOString().split('T')[0],
+        label: `${weekStart.toISOString().split('T')[0]} → ${weekEndLocal.toISOString().split('T')[0]}`
       });
     }
     
@@ -63,8 +64,9 @@ export default function WeeklySurveyModal({ isOpen, onClose, onSurveyComplete })
 
   // Helper to format week label as 'Mon, Jul 14 – Sun, Jul 20'
   function formatWeekLabel(week, idx) {
-    const start = new Date(week.week_start + 'T00:00:00');
-    const end = new Date(week.week_end + 'T00:00:00');
+    // Force UTC interpretation to avoid timezone conversion issues
+    const start = new Date(week.week_start + 'T00:00:00Z');
+    const end = new Date(week.week_end + 'T00:00:00Z');
     const startStr = format(start, 'EEE, MMM d');
     const endStr = format(end, 'EEE, MMM d');
     if (idx === 0) {

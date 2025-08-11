@@ -136,7 +136,8 @@ export default function Insights() {
   // Calculate most active day of the week
   const weekdayTotals = [0, 0, 0, 0, 0, 0, 0]; // Sun-Sat
   Object.entries(heatmapData).forEach(([date, count]) => {
-    const day = getDay(new Date(date + 'T00:00:00')); // 0 (Sun) - 6 (Sat)
+    // Force UTC interpretation to avoid timezone conversion issues
+    const day = getDay(new Date(date + 'T00:00:00Z')); // 0 (Sun) - 6 (Sat)
     weekdayTotals[day] += count;
   });
   const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

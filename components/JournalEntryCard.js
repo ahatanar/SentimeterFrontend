@@ -6,7 +6,14 @@ const JournalEntryCard = ({ entry, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const formatDate = (timestamp) => {
-    return formatDateLocalNoYear(timestamp);
+    // Ensure timestamp is treated as UTC and format correctly
+    const date = new Date(timestamp + 'Z'); // Force UTC interpretation
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC' // Force UTC timezone to avoid conversion issues
+    }).replace(/(\d+)(?=(,\s\d{4}))/, '$1th').split(',')[0];
   };
 
   const truncateText = (text, maxLength = 60) => {
@@ -29,7 +36,8 @@ const JournalEntryCard = ({ entry, onDelete }) => {
   };
 
   const getYear = (timestamp) => {
-    return getYearLocal(timestamp);
+    const date = new Date(timestamp + 'Z');
+    return date.getUTCFullYear();
   };
 
   return (
