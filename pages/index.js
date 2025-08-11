@@ -282,9 +282,13 @@ export default function Home() {
                         onChange={(date) => {
                           setDateValue(date);
                           if (date) {
-                            // Create a date at noon in local timezone to avoid timezone conversion issues
+                            // Create a date at noon in local timezone and format it properly
                             const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
-                            setSelectedDate(localDate.toISOString().split('T')[0]);
+                            // Format as YYYY-MM-DD without timezone conversion
+                            const year = localDate.getFullYear();
+                            const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                            const day = String(localDate.getDate()).padStart(2, '0');
+                            setSelectedDate(`${year}-${month}-${day}`);
                           } else {
                             setSelectedDate("");
                           }
