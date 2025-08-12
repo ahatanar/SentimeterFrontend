@@ -5,14 +5,23 @@ import { formatDateLocalNoYear, getYearLocal } from '../utils/dateUtils';
 const JournalEntryCard = ({ entry, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Debug: see what the entry data looks like
+  console.log('Entry data:', entry);
+  console.log('Timestamp field:', entry?.timestamp);
+
   const formatDate = (timestamp) => {
-    // Ensure timestamp is treated as UTC and format correctly
-    const date = new Date(timestamp + 'Z'); // Force UTC interpretation
+    // Parse ISO 8601 format with timezone info (most reliable)
+    const isoString = timestamp.replace('+00:00', '');
+    const date = new Date(isoString);
+    
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+    
     return date.toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
-      year: 'numeric',
-      timeZone: 'UTC' // Force UTC timezone to avoid conversion issues
+      year: 'numeric'
     }).replace(/(\d+)(?=(,\s\d{4}))/, '$1th').split(',')[0];
   };
 
@@ -36,8 +45,14 @@ const JournalEntryCard = ({ entry, onDelete }) => {
   };
 
   const getYear = (timestamp) => {
-    const date = new Date(timestamp + 'Z');
-    return date.getUTCFullYear();
+    const isoString = timestamp.replace('+00:00', '');
+    const date = new Date(isoString);
+    
+    if (isNaN(date.getTime())) {
+      return "Invalid Year";
+    }
+    
+    return date.getFullYear();
   };
 
   return (
